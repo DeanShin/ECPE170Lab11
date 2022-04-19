@@ -344,7 +344,49 @@ checkDraw:
 # Main function
 #-------------------------------------------------------------------
 main:
+    # while(true)
+    WHILE_1_START:
+        # if(checkDraw())
+        IF_1_START:
 
+            j IF_1_END
+        IF_1_END:
+
+        # if(humanTurn)
+        IF_2_START:
+            # while(true)
+            WHILE_2_START:
+                # if(validMove(col))
+                IF_3_START:
+
+                    j IF_3_END
+                ELSE_3:
+
+                    j IF_3_END
+                IF_3_END:
+                j WHILE_2_START
+            WHILE_2_END:
+            j IF_2_END
+        ELSE_2:
+            # while(true)
+            WHILE_3_START:
+                # if(validMove(col))
+                IF_4_START:
+
+                    j IF_4_END
+                IF_4_END:
+                j WHILE_3_START
+            WHILE_3_END:
+            j IF_2_END
+        IF_2_END:
+
+        # checkWin(token)
+        IF_5_START:
+
+            j IF_5_END
+        IF_5_END:
+        j WHILE_1_START
+    WHILE_1_END:
 
     # Exit program
 	li $v0, 10  # Sets $v0 to "10" to select exit syscall
