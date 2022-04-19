@@ -13,8 +13,6 @@ char board[6][9] = {
     {'C', '.', '.', '.', '.', '.', '.', '.', 'C'},
     {'H', '.', '.', '.', '.', '.', '.', '.', 'H'}
 };
-uint32_t rows = 6;
-uint32_t cols = 9;
 
 uint32_t get_random() {
     uint32_t result;
@@ -33,9 +31,9 @@ uint32_t random_in_range(uint32_t low, uint32_t high) {
 void printBoard() {
     printf("  1 2 3 4 5 6 7\n");
     printf("-----------------\n");
-    for(int i = 0; i < rows; i++) {
-        for(int j = 0; j < cols; j++) {
-            printf("%c ", board[i][j]);
+    for(int row = 0; row < 6; row++) {
+        for(int col = 0; col < 9; col++) {
+            printf("%c ", board[row][col]);
         }
         printf("\n");
     }
@@ -43,15 +41,15 @@ void printBoard() {
 }
 
 bool validMove(uint32_t col) {
-    if(col < 0 || col >= cols) return false;
+    if(col < 0 || col >= 9) return false;
     if(board[0][col] != '.') return false;
     return true;
 }
 
 void placeMove(uint32_t col, char token) {
-    for(int i = rows - 1; i >= 0; i--) {
-        if(board[i][col] == '.') {
-            board[i][col] = token;
+    for(int row = 5; row >= 0; row--) {
+        if(board[row][col] == '.') {
+            board[row][col] = token;
             break;
         }
     }
@@ -63,14 +61,14 @@ bool checkWin(char token) {
     int rowOffsets[] = {1, 1, 1, 0};
     int colOffsets[] = {-1, 0, 1, 1};
     // Iterate over every starting position
-    for(int row = 0; row < rows; row++) {
-        for(int col = 0; col < cols; col++) {
+    for(int row = 0; row < 6; row++) {
+        for(int col = 0; col < 9; col++) {
             // Try every direction: /, |, \, and -
             for(int k = 0; k < 4; k++) {
                 int newRow = row;
                 int newCol = col;
                 int l = 0;
-                while(newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && board[newRow][newCol] == token) {
+                while(newRow >= 0 && newRow < 6 && newCol >= 0 && newCol < 9 && board[newRow][newCol] == token) {
                     newRow += rowOffsets[k];
                     newCol += colOffsets[k];
                     l++;
@@ -85,8 +83,8 @@ bool checkWin(char token) {
 }
 
 bool checkDraw() {
-    for(int i = 0; i < cols; i++) {
-        if(validMove(i)) {
+    for(int col = 0; col < 9; col++) {
+        if(validMove(col)) {
             return false;
         }
     }
