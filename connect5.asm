@@ -365,8 +365,8 @@ checkWin:
                     # newCol >= 0
                     li $t0, 0
                     blt $s4, $t0, CHECK_WIN_WHILE_END
-                    # newCol < 6
-                    li $t0, 6
+                    # newCol < 9
+                    li $t0, 9
                     bge $s4, $t0, CHECK_WIN_WHILE_END
                     
                     # board[newRow][newCol] == token
