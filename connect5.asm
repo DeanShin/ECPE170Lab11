@@ -135,6 +135,15 @@ printBoard:
     addi $sp,$sp,-4		# Adjust stack pointer
 	sw $s1,0($sp)		# Save $s1
 
+    # Print "  1 2 3 4 5 6 7\n"
+    la $a0, printBoardMsg1
+    li $v0, 4
+    syscall
+    # Print "-----------------\n"
+    la $a0, printBoardMsg2
+    li $v0, 4
+    syscall
+
     # Mapping: 
     # s0 = row
     # s1 = col
@@ -149,13 +158,42 @@ printBoard:
             # col < 9
             li $t0, 9
             bge $s1, $t0, PRINT_BOARD_FOR_2_END
-        
+
+            # t0 = row * 9 + col
+            li $t0, 9
+            mul $t0, $s0, $t0
+            add $t0, $t0, $s1
+            # t0 = board[row][col]
+            la $t1, board   
+            add $t0, $t0, $t1
+            lb $t0, 0($t0)
+            # Print board[row][col]
+            move $a0, $t0
+            li $v0, 11
+            syscall
+
+            # Print " "
+            la $a0, printBoardMsg3
+            li $v0, 4
+            syscall
+
             addi $s1, $s1, 1    # col++
             j PRINT_BOARD_FOR_2_START
         PRINT_BOARD_FOR_2_END:
+
+        # Print "\n"
+        la $a0, printBoardMsg4
+        li $v0, 4
+        syscall
+
         addi $s0, $s0, 1    # row++
         j PRINT_BOARD_FOR_1_START
     PRINT_BOARD_FOR_1_END:
+
+    # Print "-----------------\n"
+    la $a0, printBoardMsg2
+    li $v0, 4
+    syscall
 
     # Pop from stack
     lw $s1,0($sp)		# Restore $s1
@@ -177,6 +215,39 @@ validMove:
     addi $sp,$sp,-4		# Adjust stack pointer
 	sw $ra,0($sp)		# Save $ra
 
+    # col < 0
+    li $t0, 0
+    blt $a0, $t0, VALID_MOVE_IF_1
+    # col >= 9
+    li $t0, 9
+    bge $a0, $t0, VALID_MOVE_IF_1
+    j VALID_MOVE_IF_END_1
+    VALID_MOVE_IF_1:
+        # Return false
+        li $v0, 0   
+        j VALID_MOVE_RETURN
+    VALID_MOVE_IF_END_1:
+
+    # board[0][col] != '.'
+    # t0 = board[0][col]
+    la $t1, board   
+    add $t0, $a0, $t1
+    lb $t0, 0($t0)
+
+    li $t1, 46 # t1 = ascii for '.'
+    bne $t0, $t1, VALID_MOVE_IF_2
+    j VALID_MOVE_IF_END_2
+
+    VALID_MOVE_IF_2:
+        # Return false
+        li $v0, 0   
+        j VALID_MOVE_RETURN
+    VALID_MOVE_IF_END_2:
+
+    # Return true
+    li $v0, 1
+    j VALID_MOVE_RETURN
+    VALID_MOVE_RETURN:
     # Pop from stack
     lw $ra,0($sp)		# Restore $ra
 	addi $sp,$sp,4		# Adjust stack pointer
@@ -202,6 +273,25 @@ placeMove:
         # i >= 0
         li $t0, 0
         blt $s0, $t0, PLACE_MOVE_FOR_1_END
+
+        # t0 = row * 9 + col
+        li $t0, 9
+        mul $t0, $s0, $t0
+        add $t0, $t0, $a0
+        # t0 = &board[row][col]
+        la $t1, board   
+        add $t0, $t0, $t1
+        # t1 = board[row][col]
+        lb $t1, 0($t0)
+
+        # board[row][col] == '.'
+        li $t2, 46 # t2 = ascii for '.'
+        beq $t1, $t2, PLACE_MOVE_IF_1
+        j PLACE_MOVE_IF_1_END
+        PLACE_MOVE_IF_1:
+            sb $a1, 0($t0)
+            j PLACE_MOVE_FOR_1_END
+        PLACE_MOVE_IF_1_END:
 
         addi $s0, $s0, -1    # i--
         j PLACE_MOVE_FOR_1_START
