@@ -512,24 +512,116 @@ checkDraw:
 # Main function
 #-------------------------------------------------------------------
 main:
+    # printf("Enter two positive numbers to initialize the random number generator.\n");
+    la $a0, msg1
+    li $v0, 4
+    syscall
+    # printf("Number 1: ");
+    la $a0, msg2
+    li $v0, 4
+    syscall
+    # scanf("%u", &m_w);
+    li $v0, 5
+    syscall
+    la $t0, m_w
+    sw $v0, 0($t0)
+    # printf("Number 2: ");
+    la $a0, msg3
+    li $v0, 4
+    syscall
+    # scanf("%u", &m_z);
+    li $v0, 5
+    syscall
+    la $t0, m_z
+    sw $v0, 0($t0)
+    # printf("Human player (H)\nComputer player (C)\n");
+    la $a0, msg4
+    li $v0, 4
+    syscall
+
+    # MAPPING: 
+    # s0 = bool humanTurn, 
+    # s1 = u_int32_t col,
+    # s2 = char token
+
+    # bool humanTurn;
+    li $s0, 0
+    # humanTurn = random_in_range(0, 1);
+    li $a0, 0
+    li $a1, 1
+    jal random_in_range
+    move $s0, $v0
+
+    # humanTurn ? "HUMAN" : "COMPUTER"
+    li $t0, 1
+    beq $s0, $t0, TERNARY_1_TRUE
+    j TERNARY_1_FALSE
+    TERNARY_1_TRUE:
+        # printf("Coin toss... HUMAN goes first.\n");
+        la $a0, msg5
+        li $v0, 4
+        syscall
+        j TERNARY_1_END
+    TERNARY_1_FALSE:
+        # printf("Coin toss... COMPUTER goes first.\n");
+        la $a0, msg6
+        li $v0, 4
+        syscall
+        j TERNARY_1_END
+    TERNARY_1_END:
+    
     # while(true)
     WHILE_1_START:
         # if(checkDraw())
+        jal checkDraw
+        li $t0, 1
+        beq $v0, $t0, IF_1_START
+        j IF_1_END
         IF_1_START:
-
-            j IF_1_END
+            # printf("No moves available. It's a draw!\n");
+            la $a0, msg7
+            li $v0, 4
+            syscall
+            # break;
+            j WHILE_1_END
         IF_1_END:
 
+        # s1 = col = 0
+        li $s1, 0
+        
         # if(humanTurn)
+        li $t0, 1
+        beq $s0, $t0, IF_2_START
+        j ELSE_2
         IF_2_START:
+            # printBoard();
+            jal printBoard
             # while(true)
             WHILE_2_START:
+                # printf("What column would you like to drop token into? Enter 1-7: ");
+                la $a0, msg8
+                li $v0, 4
+                syscall
+
+                # scanf("%u", &col)
+                li $v0, 5
+                syscall
+                move $s1, $v0
+
                 # if(validMove(col))
+                move $a0, $s1
+                jal validMove
+                li $t0, 1
+                beq $v0, $t0, IF_3_START
+                j ELSE_3
                 IF_3_START:
-
-                    j IF_3_END
+                    # break;
+                    j WHILE_2_END
                 ELSE_3:
-
+                    # printf("Invalid move. ");
+                    la $a0, msg9
+                    li $v0, 4
+                    syscall
                     j IF_3_END
                 IF_3_END:
                 j WHILE_2_START
@@ -538,21 +630,94 @@ main:
         ELSE_2:
             # while(true)
             WHILE_3_START:
-                # if(validMove(col))
-                IF_4_START:
+                # col = random_in_range(1, 7);
+                li $a0, 1
+                li $a1, 7
+                jal random_in_range
+                move $s1, $v0
 
-                    j IF_4_END
+                # if(validMove(col))
+                move $a0, $s1
+                jal validMove
+                li $t0, 1
+                beq $v0, $t0, IF_4_START
+                j IF_4_END
+                IF_4_START:
+                    # break
+                    j WHILE_3_END
                 IF_4_END:
                 j WHILE_3_START
             WHILE_3_END:
+
+            # printf("Computer player selected column ");
+            la $a0, msg10
+            li $v0, 4
+            syscall
+
+            # print col
+            move $a0, $s1
+            li $v0, 1
+            syscall
+
+            # printf("\n");
+            la $a0, msg11
+            li $v0, 4
+            syscall
+
             j IF_2_END
         IF_2_END:
 
-        # checkWin(token)
-        IF_5_START:
+        # token = humanTurn ? 'H' : 'C'
+        li $t0, 1
+        beq $s0, $t0, TERNARY_2_TRUE
+        j TERNARY_2_FALSE
+        TERNARY_2_TRUE:
+            li $s2, 72
+            j TERNARY_2_END
+        TERNARY_2_FALSE:
+            li $s2, 67
+            j TERNARY_2_END
+        TERNARY_2_END:
 
-            j IF_5_END
+        # placeMove(col, token);
+        move $a0, $s1
+        move $a1, $s2
+        jal placeMove
+
+        # checkWin(token)
+        move $a0, $s2
+        jal checkWin
+        li $t0, 1
+        beq $v0, $t0, IF_5_START
+        j IF_5_END
+        IF_5_START:
+            jal printBoard
+
+            li $t0, 1
+            beq $s0, $t0, TERNARY_3_TRUE
+            j TERNARY_3_FALSE
+            
+            TERNARY_3_TRUE:
+                # printf("Congratulations, HUMAN Winner!\n");
+                la $a0, msg12
+                li $v0, 4
+                syscall
+                j TERNARY_3_END
+            TERNARY_3_FALSE:
+                # printf("Congratulations, COMPUTER Winner!\n");
+                la $a0, msg13
+                li $v0, 4
+                syscall
+                j TERNARY_3_END
+            TERNARY_3_END:
+
+            # break;
+            j WHILE_1_END
         IF_5_END:
+
+        # humanTurn = !humanTurn
+        li $t0, 1
+        xor $s0, $s0, $t0
         j WHILE_1_START
     WHILE_1_END:
 
@@ -574,3 +739,17 @@ main:
     printBoardMsg2: .asciiz "-----------------\n"
     printBoardMsg3: .asciiz " "
     printBoardMsg4: .asciiz "\n"
+
+    msg1: .asciiz "Enter two positive numbers to initialize the random number generator.\n"
+    msg2: .asciiz "Number 1: "
+    msg3: .asciiz "Number 2: "
+    msg4: .asciiz "Human player (H)\nComputer player (C)\n"
+    msg5: .asciiz "Coin toss... HUMAN goes first.\n"
+    msg6: .asciiz "Coin toss... COMPUTER goes first.\n"
+    msg7: .asciiz "No moves available. It's a draw!\n"
+    msg8: .asciiz "What column would you like to drop token into? Enter 1-7: "
+    msg9: .asciiz "Invalid move. "
+    msg10: .asciiz "Computer player selected column "
+    msg11: .asciiz "\n"
+    msg12: .asciiz "Congratulations, HUMAN Winner!\n"
+    msg13: .asciiz "Congratulations, COMPUTER Winner!\n"

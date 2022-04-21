@@ -98,8 +98,7 @@ int main() {
     scanf("%u", &m_w);
     printf("Number 2: ");
     scanf("%u", &m_z);
-    printf("Human player (H)\n");
-    printf("Computer player (C)\n");
+    printf("Human player (H)\nComputer player (C)\n");
 
     // Determine who has the first move
     bool humanTurn; 
