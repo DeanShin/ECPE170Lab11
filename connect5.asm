@@ -352,17 +352,74 @@ checkWin:
                 li $t0, 4
                 bge $s2, $t0, CHECK_WIN_FOR_3_END
             
-
-
+                move $s3, $s0 # int newRow = row
+                move $s4, $s1 # int newCol = col
+                li $s5, 0     # l = 0
                 CHECK_WIN_WHILE_START:
+                    # newRow >= 0
+                    li $t0, 0
+                    blt $s3, $t0, CHECK_WIN_WHILE_END
+                    # newRow < 6
+                    li $t0, 6
+                    bge $s3, $t0, CHECK_WIN_WHILE_END
+                    # newCol >= 0
+                    li $t0, 0
+                    blt $s4, $t0, CHECK_WIN_WHILE_END
+                    # newCol < 6
+                    li $t0, 6
+                    bge $s4, $t0, CHECK_WIN_WHILE_END
+                    
+                    # board[newRow][newCol] == token
+                    
+                    # t0 = newRow * 9 + newCol
+                    li $t0, 9
+                    mul $t0, $t0, $s3
+                    add $t0, $t0, $s4
+                    # t0 = &board[newRow][newCol]
+                    la $t1, board   
+                    add $t0, $t0, $t1
+                    # t0 = board[newRow][newCol]
+                    lb $t0, 0($t0)
+                    # board[newRow][newCol] == token
+                    bne $t0, $a0, CHECK_WIN_WHILE_END
 
+                    # newRow += rowOffsets[k]
+                    # t0 = k * 4
+                    li $t0, 4
+                    mul $t0, $t0, $s2
+                    # t0 = &rowOffsets[k]
+                    la $t1, rowOffsets
+                    add $t0, $t0, $t1
+                    # t0 = rowOffsets[k]
+                    lw $t0, 0($t0)
+                    # newRow += rowOffsets[k]
+                    add $s3, $s3, $t0
+                    
+                    # newRow += colOffsets[k]
+                    # t0 = k * 4
+                    li $t0, 4
+                    mul $t0, $t0, $s2
+                    # t0 = &colOffsets[k]
+                    la $t1, colOffsets
+                    add $t0, $t0, $t1
+                    # t0 = colOffsets[k]
+                    lw $t0, 0($t0)
+                    # newCol += colOffsets[k]
+                    add $s4, $s4, $t0
+
+                    # l++
+                    addi $s5, $s5, 1
 
                     j CHECK_WIN_WHILE_START
                 CHECK_WIN_WHILE_END:
+                # l >= 5
+                li $t0, 5
+                blt $s5, $t0, CHECK_WIN_IF_END
+                j CHECK_WIN_IF_START
                 CHECK_WIN_IF_START:
-
-
-                    j CHECK_WIN_IF_END
+                    # return true
+                    li $v0, 1
+                    j CHECK_WIN_RETURN
                 CHECK_WIN_IF_END:
                 
                 addi $s2, $s2, 1    # k++
@@ -375,7 +432,12 @@ checkWin:
         addi $s0, $s0, 1    # row++
         j CHECK_WIN_FOR_1_START
     CHECK_WIN_FOR_1_END:
+
+    # return false
+    li $v0, 0
+    j CHECK_WIN_RETURN
     
+    CHECK_WIN_RETURN:
     # Pop from stack
     lw $s5,0($sp)		# Restore $s5
 	addi $sp,$sp,4		# Adjust stack pointer
@@ -411,15 +473,31 @@ checkDraw:
     # Mapping: 
     # s0 = col
     li $s0, 0 # col = 0
-    PRINT_BOARD_FOR_2_START:
+    CHECK_DRAW_FOR_START:
         # col < 9
         li $t0, 9
-        bge $s0, $t0, PRINT_BOARD_FOR_2_END
+        bge $s0, $t0, CHECK_DRAW_FOR_END
     
-        addi $s0, $s0, 1    # col++
-        j PRINT_BOARD_FOR_2_START
-    PRINT_BOARD_FOR_2_END:
+        # if(validMove(col))
+        move $a0, $s0
+        jal validMove
+        bne $v0, 1, CHECK_DRAW_IF_END
+        j CHECK_DRAW_IF_START
+        CHECK_DRAW_IF_START:
+            # return false
+            li $v0, 0
+            j CHECK_DRAW_RETURN
+        CHECK_DRAW_IF_END:
 
+        addi $s0, $s0, 1    # col++
+        j CHECK_DRAW_FOR_START
+    CHECK_DRAW_FOR_END:
+
+    # return true
+    li $v0, 1
+    j CHECK_DRAW_RETURN
+
+    CHECK_DRAW_RETURN:
     # Pop from stack
     lw $s0,0($sp)		# Restore $s0
 	addi $sp,$sp,4		# Adjust stack pointer
@@ -490,6 +568,8 @@ main:
 	m_w: .word 0    # Initialize m_w = 0
     m_z: .word 0    # Initialize m_z = 0
     board: .ascii "C.......CH.......HC.......CH.......HC.......CH.......H"
+    rowOffsets: .word 1 1 1 0
+    colOffsets: .word -1 0 1 1
     printBoardMsg1: .asciiz "  1 2 3 4 5 6 7\n"
     printBoardMsg2: .asciiz "-----------------\n"
     printBoardMsg3: .asciiz " "
