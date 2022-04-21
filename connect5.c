@@ -145,7 +145,7 @@ int main() {
         // If win, break.
         if(checkWin(token)) {
             printBoard();
-            printf("Congratulations, %s Winner!\n", humanTurn ? "Human" : "Computer");
+            printf("Congratulations, %s Winner!\n", humanTurn ? "HUMAN" : "COMPUTER");
             break;
         }
         humanTurn = !humanTurn;

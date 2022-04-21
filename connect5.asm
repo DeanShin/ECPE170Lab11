@@ -424,7 +424,7 @@ checkWin:
                 
                 addi $s2, $s2, 1    # k++
                 j CHECK_WIN_FOR_3_START
-            CHECK_WIN_FOR_2_END:
+            CHECK_WIN_FOR_3_END:
 
             addi $s1, $s1, 1    # col++
             j CHECK_WIN_FOR_2_START
