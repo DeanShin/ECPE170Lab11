@@ -721,8 +721,8 @@ main:
 	m_w: .word 0    # Initialize m_w = 0
     m_z: .word 0    # Initialize m_z = 0
     board: .ascii "C.......CH.......HC.......CH.......HC.......CH.......H"
-    rowOffsets: .word 1 1 1 0
-    colOffsets: .word -1 0 1 1
+    rowOffsets: .word 1 1 1 0   # rowOffsets = {1, 1, 1, 0}
+    colOffsets: .word -1 0 1 1  # colOffsets = {-1, 0, 1, 1}
     printBoardMsg1: .asciiz "  1 2 3 4 5 6 7\n"
     printBoardMsg2: .asciiz "-----------------\n"
     printBoardMsg3: .asciiz " "
