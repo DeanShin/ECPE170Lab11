@@ -136,64 +136,64 @@ printBoard:
 	sw $s1,0($sp)		# Save $s1
 
     # Print "  1 2 3 4 5 6 7\n"
-    la $a0, printBoardMsg1
-    li $v0, 4
-    syscall
+    la $a0, printBoardMsg1  # load address of msg1
+    li $v0, 4               # select print_string
+    syscall                 # print
     # Print "-----------------\n"
-    la $a0, printBoardMsg2
-    li $v0, 4
-    syscall
+    la $a0, printBoardMsg2  # load address of msg2
+    li $v0, 4               # select print_string
+    syscall                 # print
 
     # Mapping: 
     # s0 = row
     # s1 = col
     li $s0, 0 # row = 0
-    PRINT_BOARD_FOR_1_START:
+    PRINT_BOARD_FOR_1_START:    # mark start of for loop
         # row < 6
-        li $t0, 6
-        bge $s0, $t0, PRINT_BOARD_FOR_1_END
+        li $t0, 6 # t0 = 6
+        bge $s0, $t0, PRINT_BOARD_FOR_1_END # if row >= 6, exit for loop
 
         li $s1, 0 # col = 0
-        PRINT_BOARD_FOR_2_START:
+        PRINT_BOARD_FOR_2_START:    # mark start of for loop
             # col < 9
-            li $t0, 9
-            bge $s1, $t0, PRINT_BOARD_FOR_2_END
+            li $t0, 9   # t0 = 9
+            bge $s1, $t0, PRINT_BOARD_FOR_2_END # if row >= 9, exit for loop
 
             # t0 = row * 9 + col
-            li $t0, 9
-            mul $t0, $s0, $t0
-            add $t0, $t0, $s1
+            li $t0, 9           # t0 = 9
+            mul $t0, $s0, $t0   # t0 = 9 * row
+            add $t0, $t0, $s1   # t0 = 9 * row + col
             # t0 = board[row][col]
-            la $t1, board   
-            add $t0, $t0, $t1
-            lb $t0, 0($t0)
+            la $t1, board       # t1 = board
+            add $t0, $t0, $t1   # t0 = &board[row][col]
+            lb $t0, 0($t0)      # t0 = board[row][col]
             # Print board[row][col]
-            move $a0, $t0
-            li $v0, 11
-            syscall
+            move $a0, $t0       # prepare board[row][col] for printing
+            li $v0, 11          # select print_char
+            syscall             # print
 
             # Print " "
-            la $a0, printBoardMsg3
-            li $v0, 4
-            syscall
+            la $a0, printBoardMsg3  # load address of msg3
+            li $v0, 4               # select print_string
+            syscall                 # print
 
             addi $s1, $s1, 1    # col++
-            j PRINT_BOARD_FOR_2_START
-        PRINT_BOARD_FOR_2_END:
+            j PRINT_BOARD_FOR_2_START # go back to top of for loop
+        PRINT_BOARD_FOR_2_END:      # mark end of for loop
 
         # Print "\n"
-        la $a0, printBoardMsg4
-        li $v0, 4
-        syscall
+        la $a0, printBoardMsg4  # load address of msg4
+        li $v0, 4               # select print_string
+        syscall                 # print
 
         addi $s0, $s0, 1    # row++
-        j PRINT_BOARD_FOR_1_START
-    PRINT_BOARD_FOR_1_END:
+        j PRINT_BOARD_FOR_1_START   # go back to top of for loop
+    PRINT_BOARD_FOR_1_END:      # mark end of for loop
 
     # Print "-----------------\n"
-    la $a0, printBoardMsg2
-    li $v0, 4
-    syscall
+    la $a0, printBoardMsg2  # load address of msg2
+    li $v0, 4               # select print_string
+    syscall                 # print 
 
     # Pop from stack
     lw $s1,0($sp)		# Restore $s1
@@ -204,7 +204,7 @@ printBoard:
 	addi $sp,$sp,4		# Adjust stack pointer
 
     # Return from function
-    jr $ra
+    jr $ra  # return
 
 # validMove function
 # Arguments: a0 = col
@@ -216,37 +216,37 @@ validMove:
 	sw $ra,0($sp)		# Save $ra
 
     # col < 0
-    li $t0, 0
-    blt $a0, $t0, VALID_MOVE_IF_1
+    li $t0, 0   # t0 = 0
+    blt $a0, $t0, VALID_MOVE_IF_1   # if col < 0, go into if statement
     # col >= 9
-    li $t0, 9
-    bge $a0, $t0, VALID_MOVE_IF_1
-    j VALID_MOVE_IF_END_1
-    VALID_MOVE_IF_1:
+    li $t0, 9   # t0 = 9
+    bge $a0, $t0, VALID_MOVE_IF_1   # if col >= 9, go into if statement
+    j VALID_MOVE_IF_END_1   # otherwise, do not go into if statement
+    VALID_MOVE_IF_1:        # start of if
         # Return false
-        li $v0, 0   
-        j VALID_MOVE_RETURN
-    VALID_MOVE_IF_END_1:
+        li $v0, 0           # set 0/false as return value
+        j VALID_MOVE_RETURN # return
+    VALID_MOVE_IF_END_1:    # end of if
 
     # board[0][col] != '.'
     # t0 = board[0][col]
-    la $t1, board   
-    add $t0, $a0, $t1
-    lb $t0, 0($t0)
+    la $t1, board       # t1 = board
+    add $t0, $a0, $t1   # t0 = &board[0][col]
+    lb $t0, 0($t0)      # t0 = board[0][col]
 
     li $t1, 46 # t1 = ascii for '.'
-    bne $t0, $t1, VALID_MOVE_IF_2
-    j VALID_MOVE_IF_END_2
+    bne $t0, $t1, VALID_MOVE_IF_2   # if board[0][col] != '.', go into if statement.
+    j VALID_MOVE_IF_END_2           # otherwise, do not go into if statement.
 
-    VALID_MOVE_IF_2:
+    VALID_MOVE_IF_2:        # start of if
         # Return false
-        li $v0, 0   
-        j VALID_MOVE_RETURN
-    VALID_MOVE_IF_END_2:
+        li $v0, 0           # set 0/false as return value
+        j VALID_MOVE_RETURN # return
+    VALID_MOVE_IF_END_2:    # end of if
 
     # Return true
-    li $v0, 1
-    j VALID_MOVE_RETURN
+    li $v0, 1           # set 1/true as return value
+    j VALID_MOVE_RETURN # return
     VALID_MOVE_RETURN:
     # Pop from stack
     lw $ra,0($sp)		# Restore $ra
@@ -269,33 +269,33 @@ placeMove:
     # Mapping: 
     # s0 = i
     li $s0, 5 # i = 5
-    PLACE_MOVE_FOR_1_START:
+    PLACE_MOVE_FOR_1_START: # start of for
         # i >= 0
-        li $t0, 0
-        blt $s0, $t0, PLACE_MOVE_FOR_1_END
+        li $t0, 0   # t0 = 0
+        blt $s0, $t0, PLACE_MOVE_FOR_1_END # if i < 0, exit for loop
 
         # t0 = row * 9 + col
-        li $t0, 9
-        mul $t0, $s0, $t0
-        add $t0, $t0, $a0
+        li $t0, 9   # t0 = 9
+        mul $t0, $s0, $t0   # t0 = row * 9
+        add $t0, $t0, $a0   # t0 = row * 9 + col
         # t0 = &board[row][col]
-        la $t1, board   
-        add $t0, $t0, $t1
+        la $t1, board       # t1 = board
+        add $t0, $t0, $t1   # t0 = &board[row][col]
         # t1 = board[row][col]
         lb $t1, 0($t0)
 
         # board[row][col] == '.'
         li $t2, 46 # t2 = ascii for '.'
-        beq $t1, $t2, PLACE_MOVE_IF_1
-        j PLACE_MOVE_IF_1_END
-        PLACE_MOVE_IF_1:
-            sb $a1, 0($t0)
-            j PLACE_MOVE_FOR_1_END
-        PLACE_MOVE_IF_1_END:
+        beq $t1, $t2, PLACE_MOVE_IF_1   # if board[row][col] == '.', then go into if statement
+        j PLACE_MOVE_IF_1_END           # otherwise, skip if statement.
+        PLACE_MOVE_IF_1:    # start of if
+            sb $a1, 0($t0)  # board[row][col] = token
+            j PLACE_MOVE_FOR_1_END  # break
+        PLACE_MOVE_IF_1_END:    # end of if
 
         addi $s0, $s0, -1    # i--
-        j PLACE_MOVE_FOR_1_START
-    PLACE_MOVE_FOR_1_END:
+        j PLACE_MOVE_FOR_1_START    # jump back to start of for loop
+    PLACE_MOVE_FOR_1_END:   # end of for
 
     # Pop from stack
     lw $s0,0($sp)		# Restore $s0
@@ -304,7 +304,7 @@ placeMove:
 	addi $sp,$sp,4		# Adjust stack pointer
 
     # Return from function
-    jr $ra
+    jr $ra  # return
 
 # checkWin function
 # Arguments: a0 = token
@@ -335,107 +335,96 @@ checkWin:
     # s4 = newCol
     # s5 = l
     li $s0, 0 # row = 0
-    CHECK_WIN_FOR_1_START:
+    CHECK_WIN_FOR_1_START:  # for start
         # row < 6
-        li $t0, 6
-        bge $s0, $t0, CHECK_WIN_FOR_1_END
+        li $t0, 6   # t0 = 6
+        bge $s0, $t0, CHECK_WIN_FOR_1_END   # if row >= 6, exit for
 
         li $s1, 0 # col = 0
-        CHECK_WIN_FOR_2_START:
+        CHECK_WIN_FOR_2_START: # for start
             # col < 9
-            li $t0, 9
-            bge $s1, $t0, CHECK_WIN_FOR_2_END
+            li $t0, 9   # t0 = 9
+            bge $s1, $t0, CHECK_WIN_FOR_2_END   # if col >= 9, exit for
 
             li $s2, 0 # k = 0
-            CHECK_WIN_FOR_3_START:
+            CHECK_WIN_FOR_3_START: # for start
                 # k < 4
-                li $t0, 4
-                bge $s2, $t0, CHECK_WIN_FOR_3_END
+                li $t0, 4   # t0 = 4
+                bge $s2, $t0, CHECK_WIN_FOR_3_END   # if k >= 4, exit for
             
                 move $s3, $s0 # int newRow = row
                 move $s4, $s1 # int newCol = col
                 li $s5, 0     # l = 0
-                CHECK_WIN_WHILE_START:
+                CHECK_WIN_WHILE_START: # while start
                     # newRow >= 0
-                    li $t0, 0
-                    blt $s3, $t0, CHECK_WIN_WHILE_END
+                    li $t0, 0   # t0 = 0
+                    blt $s3, $t0, CHECK_WIN_WHILE_END   # if newRow < 0, exit while
                     # newRow < 6
-                    li $t0, 6
-                    bge $s3, $t0, CHECK_WIN_WHILE_END
+                    li $t0, 6   # t0 = 6
+                    bge $s3, $t0, CHECK_WIN_WHILE_END   # if newRow >= 6, exit while
                     # newCol >= 0
-                    li $t0, 0
-                    blt $s4, $t0, CHECK_WIN_WHILE_END
+                    li $t0, 0   # t0 = 0
+                    blt $s4, $t0, CHECK_WIN_WHILE_END   # if newCol < 0, exit while
                     # newCol < 9
-                    li $t0, 9
-                    bge $s4, $t0, CHECK_WIN_WHILE_END
+                    li $t0, 9   # t0 = 9
+                    bge $s4, $t0, CHECK_WIN_WHILE_END   # if newCol >= 9, exit while
                     
                     # board[newRow][newCol] == token
                     
-                    # t0 = newRow * 9 + newCol
-                    li $t0, 9
-                    mul $t0, $t0, $s3
-                    add $t0, $t0, $s4
-                    # t0 = &board[newRow][newCol]
-                    la $t1, board   
-                    add $t0, $t0, $t1
-                    # t0 = board[newRow][newCol]
-                    lb $t0, 0($t0)
-                    # board[newRow][newCol] == token
-                    bne $t0, $a0, CHECK_WIN_WHILE_END
+                    li $t0, 9   # t0 = 9
+                    mul $t0, $t0, $s3   # t0 = newRow * 9
+                    add $t0, $t0, $s4   # t0 = newRow * 9 + col
+                    la $t1, board       # t1 = board
+                    add $t0, $t0, $t1   # t0 = &board[newRow][newCol]
+                    lb $t0, 0($t0)      # t0 = board[newRow][newCol]
+                    bne $t0, $a0, CHECK_WIN_WHILE_END   # if board[newRow][newCol] != token, exit while loop
 
                     # newRow += rowOffsets[k]
-                    # t0 = k * 4
-                    li $t0, 4
-                    mul $t0, $t0, $s2
-                    # t0 = &rowOffsets[k]
-                    la $t1, rowOffsets
-                    add $t0, $t0, $t1
-                    # t0 = rowOffsets[k]
-                    lw $t0, 0($t0)
-                    # newRow += rowOffsets[k]
-                    add $s3, $s3, $t0
+                    li $t0, 4           # t0 = 4
+                    mul $t0, $t0, $s2   # t0 = k * 4
+                    la $t1, rowOffsets  # t1 = rowOffsets
+                    add $t0, $t0, $t1   # t0 = &rowOffsets[k]
+                    lw $t0, 0($t0)      # t0 = rowOffsets[k]
+                    add $s3, $s3, $t0   # newRow += rowOffsets[k]
                     
                     # newRow += colOffsets[k]
-                    # t0 = k * 4
-                    li $t0, 4
-                    mul $t0, $t0, $s2
-                    # t0 = &colOffsets[k]
-                    la $t1, colOffsets
-                    add $t0, $t0, $t1
-                    # t0 = colOffsets[k]
-                    lw $t0, 0($t0)
-                    # newCol += colOffsets[k]
-                    add $s4, $s4, $t0
+                    li $t0, 4           # t0 = 4
+                    mul $t0, $t0, $s2   # t0 = k * 4
+                    la $t1, colOffsets  # t1 = colOffsets
+                    add $t0, $t0, $t1   # t0 = &colOffsets[k]
+                    lw $t0, 0($t0)      # t0 = colOffsets[k]
+                    add $s4, $s4, $t0   # newCol = colOffsets[k]
 
                     # l++
-                    addi $s5, $s5, 1
+                    addi $s5, $s5, 1    # l++
 
-                    j CHECK_WIN_WHILE_START
+                    j CHECK_WIN_WHILE_START # loop
                 CHECK_WIN_WHILE_END:
                 # l >= 5
-                li $t0, 5
-                blt $s5, $t0, CHECK_WIN_IF_END
-                j CHECK_WIN_IF_START
-                CHECK_WIN_IF_START:
+                li $t0, 5                       # t0 = 5
+                blt $s5, $t0, CHECK_WIN_IF_END  # if l < 5, skip if statement
+                j CHECK_WIN_IF_START            # otherwise, go into if statement
+                CHECK_WIN_IF_START:             # if start
                     # return true
-                    li $v0, 1
-                    j CHECK_WIN_RETURN
-                CHECK_WIN_IF_END:
+                    li $v0, 1                   # set return value as 1/true
+                    j CHECK_WIN_RETURN          # return
+                CHECK_WIN_IF_END:               # if end
                 
-                addi $s2, $s2, 1    # k++
-                j CHECK_WIN_FOR_3_START
-            CHECK_WIN_FOR_3_END:
+                addi $s2, $s2, 1        # k++
+                j CHECK_WIN_FOR_3_START # loop
+            CHECK_WIN_FOR_3_END:        # for end
 
-            addi $s1, $s1, 1    # col++
-            j CHECK_WIN_FOR_2_START
-        CHECK_WIN_FOR_2_END:
-        addi $s0, $s0, 1    # row++
-        j CHECK_WIN_FOR_1_START
-    CHECK_WIN_FOR_1_END:
+            addi $s1, $s1, 1        # col++
+            j CHECK_WIN_FOR_2_START # loop
+        CHECK_WIN_FOR_2_END:        # for end
+
+        addi $s0, $s0, 1        # row++
+        j CHECK_WIN_FOR_1_START # loop
+    CHECK_WIN_FOR_1_END:        # for end
 
     # return false
-    li $v0, 0
-    j CHECK_WIN_RETURN
+    li $v0, 0   # set return value as 0/false
+    j CHECK_WIN_RETURN  # return
     
     CHECK_WIN_RETURN:
     # Pop from stack
@@ -455,7 +444,7 @@ checkWin:
 	addi $sp,$sp,4		# Adjust stack pointer
 
     # Return from function
-    jr $ra
+    jr $ra  # return
 
 
 
@@ -473,29 +462,29 @@ checkDraw:
     # Mapping: 
     # s0 = col
     li $s0, 0 # col = 0
-    CHECK_DRAW_FOR_START:
+    CHECK_DRAW_FOR_START:   # for start
         # col < 9
-        li $t0, 9
-        bge $s0, $t0, CHECK_DRAW_FOR_END
+        li $t0, 9                           # t0 = 9
+        bge $s0, $t0, CHECK_DRAW_FOR_END    # if col >= 9, then exit for loop
     
         # if(validMove(col))
-        move $a0, $s0
-        jal validMove
-        bne $v0, 1, CHECK_DRAW_IF_END
-        j CHECK_DRAW_IF_START
-        CHECK_DRAW_IF_START:
-            # return false
-            li $v0, 0
-            j CHECK_DRAW_RETURN
-        CHECK_DRAW_IF_END:
+        move $a0, $s0                   # col parameter = col
+        jal validMove                   # call validMove(col)
+        bne $v0, 1, CHECK_DRAW_IF_END   # if !validMove(col), then skip if statement
+        j CHECK_DRAW_IF_START           # otherwise, enter if statement
+        CHECK_DRAW_IF_START:    # if start
+            # return false  
+            li $v0, 0           # set return value as 0/false
+            j CHECK_DRAW_RETURN # return
+        CHECK_DRAW_IF_END:      # if end
 
         addi $s0, $s0, 1    # col++
-        j CHECK_DRAW_FOR_START
-    CHECK_DRAW_FOR_END:
+        j CHECK_DRAW_FOR_START  # loop
+    CHECK_DRAW_FOR_END:     # for end
 
     # return true
-    li $v0, 1
-    j CHECK_DRAW_RETURN
+    li $v0, 1           # set return value as 1/true
+    j CHECK_DRAW_RETURN # return
 
     CHECK_DRAW_RETURN:
     # Pop from stack
@@ -505,7 +494,7 @@ checkDraw:
 	addi $sp,$sp,4		# Adjust stack pointer
 
     # Return from function
-    jr $ra
+    jr $ra  # return
 
 
 
@@ -513,31 +502,31 @@ checkDraw:
 #-------------------------------------------------------------------
 main:
     # printf("Enter two positive numbers to initialize the random number generator.\n");
-    la $a0, msg1
-    li $v0, 4
-    syscall
+    la $a0, msg1    # load msg1 for print
+    li $v0, 4       # select print_string
+    syscall         # print
     # printf("Number 1: ");
-    la $a0, msg2
-    li $v0, 4
-    syscall
+    la $a0, msg2    # load msg2 for print
+    li $v0, 4       # select print_string
+    syscall         # print
     # scanf("%u", &m_w);
-    li $v0, 5
-    syscall
-    la $t0, m_w
-    sw $v0, 0($t0)
+    li $v0, 5       # select read_int
+    syscall         # read
+    la $t0, m_w     # t0 = &m_w
+    sw $v0, 0($t0)  # m_w = inputted integer
     # printf("Number 2: ");
-    la $a0, msg3
-    li $v0, 4
-    syscall
+    la $a0, msg3    # load msg3 for print
+    li $v0, 4       # select print_string
+    syscall         # print
     # scanf("%u", &m_z);
-    li $v0, 5
-    syscall
-    la $t0, m_z
-    sw $v0, 0($t0)
+    li $v0, 5       # select read_int
+    syscall         # read
+    la $t0, m_z     # t0 = &m_z
+    sw $v0, 0($t0)  # m_z = inputted integer
     # printf("Human player (H)\nComputer player (C)\n");
-    la $a0, msg4
-    li $v0, 4
-    syscall
+    la $a0, msg4    # load msg4 for print
+    li $v0, 4       # select print_string
+    syscall         # print
 
     # MAPPING: 
     # s0 = bool humanTurn, 
@@ -545,180 +534,179 @@ main:
     # s2 = char token
 
     # bool humanTurn;
-    li $s0, 0
+    li $s0, 0   # bool humanTurn;
     # humanTurn = random_in_range(0, 1);
-    li $a0, 0
-    li $a1, 1
-    jal random_in_range
-    move $s0, $v0
+    li $a0, 0   # low = 0
+    li $a1, 1   # high = 1
+    jal random_in_range # random_in_range(0, 1)
+    move $s0, $v0   # humanTurn = random_in_range(0, 1)
 
     # humanTurn ? "HUMAN" : "COMPUTER"
-    li $t0, 1
-    beq $s0, $t0, TERNARY_1_TRUE
-    j TERNARY_1_FALSE
+    li $t0, 1   # t0 = true
+    beq $s0, $t0, TERNARY_1_TRUE # if humanTurn == true, then go to ternary true
+    j TERNARY_1_FALSE   # otherwise, go to ternary false
     TERNARY_1_TRUE:
         # printf("Coin toss... HUMAN goes first.\n");
-        la $a0, msg5
-        li $v0, 4
-        syscall
-        j TERNARY_1_END
+        la $a0, msg5    # load msg5 for print
+        li $v0, 4       # select print_string
+        syscall         # print
+        j TERNARY_1_END # exit ternary
     TERNARY_1_FALSE:
         # printf("Coin toss... COMPUTER goes first.\n");
-        la $a0, msg6
-        li $v0, 4
-        syscall
-        j TERNARY_1_END
+        la $a0, msg6    # laod msg6 for print
+        li $v0, 4       # select print_string
+        syscall         # print
+        j TERNARY_1_END # exit ternary
     TERNARY_1_END:
     
     # while(true)
     WHILE_1_START:
         # if(checkDraw())
-        jal checkDraw
-        li $t0, 1
-        beq $v0, $t0, IF_1_START
-        j IF_1_END
+        jal checkDraw   # checkDraw()
+        li $t0, 1       # t0 = true
+        beq $v0, $t0, IF_1_START    # if checkDraw() == true, then enter if statement
+        j IF_1_END                  # otherwise, skip if statement
         IF_1_START:
             # printf("No moves available. It's a draw!\n");
-            la $a0, msg7
-            li $v0, 4
-            syscall
-            # break;
-            j WHILE_1_END
+            la $a0, msg7    # load msg7 for print
+            li $v0, 4       # select print_string
+            syscall         # print
+            j WHILE_1_END   # break
         IF_1_END:
 
         # s1 = col = 0
-        li $s1, 0
+        li $s1, 0   # col = 0
         
         # if(humanTurn)
-        li $t0, 1
-        beq $s0, $t0, IF_2_START
-        j ELSE_2
+        li $t0, 1   # t0 = 1
+        beq $s0, $t0, IF_2_START # if humanTurn == true, then enter if statement.
+        j ELSE_2                 # otherwise, enter else statement
         IF_2_START:
             # printBoard();
-            jal printBoard
+            jal printBoard  # call printBoard() function
             # while(true)
             WHILE_2_START:
                 # printf("What column would you like to drop token into? Enter 1-7: ");
-                la $a0, msg8
-                li $v0, 4
-                syscall
+                la $a0, msg8    # load msg8 for print
+                li $v0, 4       # select print_string
+                syscall         # print
 
                 # scanf("%u", &col)
-                li $v0, 5
-                syscall
-                move $s1, $v0
+                li $v0, 5       # select read_int
+                syscall         # read int
+                move $s1, $v0   # s1 = inputted int
 
                 # if(validMove(col))
-                move $a0, $s1
-                jal validMove
-                li $t0, 1
-                beq $v0, $t0, IF_3_START
-                j ELSE_3
+                move $a0, $s1   # initialize col parameter
+                jal validMove   # call validMove
+                li $t0, 1       # t0 = true
+                beq $v0, $t0, IF_3_START    # if validMove(col) == true, then enter if statement
+                j ELSE_3                    # otherwise, enter else statement
                 IF_3_START:
                     # break;
-                    j WHILE_2_END
+                    j WHILE_2_END   # break
                 ELSE_3:
                     # printf("Invalid move. ");
-                    la $a0, msg9
-                    li $v0, 4
-                    syscall
-                    j IF_3_END
+                    la $a0, msg9    # load msg9 for print
+                    li $v0, 4       # select print_string
+                    syscall         # print
+                    j IF_3_END      # exit if statement
                 IF_3_END:
-                j WHILE_2_START
+                j WHILE_2_START     # loop
             WHILE_2_END:
-            j IF_2_END
+            j IF_2_END  # exit if statement
         ELSE_2:
             # while(true)
             WHILE_3_START:
                 # col = random_in_range(1, 7);
-                li $a0, 1
-                li $a1, 7
-                jal random_in_range
-                move $s1, $v0
+                li $a0, 1   # initialize low = 1
+                li $a1, 7   # initialize high = 7
+                jal random_in_range # call random_in_range(1, 7)
+                move $s1, $v0   # col = random_in_range(1, 7)
 
                 # if(validMove(col))
-                move $a0, $s1
-                jal validMove
-                li $t0, 1
-                beq $v0, $t0, IF_4_START
-                j IF_4_END
+                move $a0, $s1   # intialize col parameter = col
+                jal validMove   # call validMove(col)
+                li $t0, 1       # t0 = true
+                beq $v0, $t0, IF_4_START    # if validMove(col) == true, then enter if statement
+                j IF_4_END                  # otherwise, skip if statement
                 IF_4_START:
                     # break
-                    j WHILE_3_END
+                    j WHILE_3_END   # break
                 IF_4_END:
-                j WHILE_3_START
+                j WHILE_3_START     # loop
             WHILE_3_END:
 
             # printf("Computer player selected column ");
-            la $a0, msg10
-            li $v0, 4
-            syscall
+            la $a0, msg10   # load msg10 for print
+            li $v0, 4       # select print_string
+            syscall         # print
 
             # print col
-            move $a0, $s1
-            li $v0, 1
-            syscall
+            move $a0, $s1   # load col for print
+            li $v0, 1       # select print_int
+            syscall         # print
 
             # printf("\n");
-            la $a0, msg11
-            li $v0, 4
-            syscall
+            la $a0, msg11   # load msg11 for print
+            li $v0, 4       # select print_string
+            syscall         # print
 
-            j IF_2_END
+            j IF_2_END      # exit if statement
         IF_2_END:
 
         # token = humanTurn ? 'H' : 'C'
-        li $t0, 1
-        beq $s0, $t0, TERNARY_2_TRUE
-        j TERNARY_2_FALSE
+        li $t0, 1   # t0 = true
+        beq $s0, $t0, TERNARY_2_TRUE    # if humanTurn == true, ternary true
+        j TERNARY_2_FALSE               # otherwise, ternary false
         TERNARY_2_TRUE:
-            li $s2, 72
-            j TERNARY_2_END
+            li $s2, 72      # token = 'H'
+            j TERNARY_2_END # exit ternary
         TERNARY_2_FALSE:
-            li $s2, 67
-            j TERNARY_2_END
+            li $s2, 67      # token = 'C'
+            j TERNARY_2_END # exit ternary
         TERNARY_2_END:
 
         # placeMove(col, token);
-        move $a0, $s1
-        move $a1, $s2
-        jal placeMove
+        move $a0, $s1   # col parameter = col
+        move $a1, $s2   # token parameter = token
+        jal placeMove   # call placeMove(col, token)
 
         # checkWin(token)
-        move $a0, $s2
-        jal checkWin
-        li $t0, 1
-        beq $v0, $t0, IF_5_START
-        j IF_5_END
+        move $a0, $s2   # token parameter = token
+        jal checkWin    # call checkWin(token)
+        li $t0, 1       # t0 = true
+        beq $v0, $t0, IF_5_START    # if checkWin(token) == true, then enter if
+        j IF_5_END                  # otherwise, skip if
         IF_5_START:
-            jal printBoard
+            jal printBoard  # call printBoard()
 
-            li $t0, 1
-            beq $s0, $t0, TERNARY_3_TRUE
-            j TERNARY_3_FALSE
+            li $t0, 1   # t0 = true
+            beq $s0, $t0, TERNARY_3_TRUE    # if humanTurn == true, then enter ternary true
+            j TERNARY_3_FALSE               # otherwise, enter ternary false
             
             TERNARY_3_TRUE:
                 # printf("Congratulations, HUMAN Winner!\n");
-                la $a0, msg12
-                li $v0, 4
-                syscall
-                j TERNARY_3_END
+                la $a0, msg12   # load msg12 for print
+                li $v0, 4       # select print_string
+                syscall         # print
+                j TERNARY_3_END # exit ternary
             TERNARY_3_FALSE:
                 # printf("Congratulations, COMPUTER Winner!\n");
-                la $a0, msg13
-                li $v0, 4
-                syscall
-                j TERNARY_3_END
+                la $a0, msg13   # load msg13 for print
+                li $v0, 4       # select print_string
+                syscall         # print
+                j TERNARY_3_END # exit ternary
             TERNARY_3_END:
 
             # break;
-            j WHILE_1_END
+            j WHILE_1_END   # break
         IF_5_END:
 
         # humanTurn = !humanTurn
-        li $t0, 1
-        xor $s0, $s0, $t0
-        j WHILE_1_START
+        li $t0, 1   # t0 = 1
+        xor $s0, $s0, $t0   # humanTurn = !humanTurn
+        j WHILE_1_START # loop
     WHILE_1_END:
 
     # Exit program
